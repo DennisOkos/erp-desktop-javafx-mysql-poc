@@ -1,0 +1,64 @@
+plugins {
+    id 'application'
+    id 'java'
+    id 'org.openjfx.javafxplugin' version '0.0.14'
+}
+
+group = 'com.example'
+version = '1.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release.set(21)
+}
+repositories {
+    mavenCentral()
+}
+
+javafx {
+    version = '21'
+    modules = [ 'javafx.controls', 'javafx.fxml' ]
+}
+
+dependencies {
+    def osName = System.getProperty('os.name').toLowerCase()
+    def javafxPlatform = osName.contains('win') ? 'win' : osName.contains('mac') ? 'mac' : 'linux'
+    // JavaFX dependencies (platform classifier required for native libs)
+    implementation "org.openjfx:javafx-controls:21:${javafxPlatform}"
+    implementation "org.openjfx:javafx-fxml:21:${javafxPlatform}"
+    implementation 'com.mysql:mysql-connector-j:8.1.0'
+    implementation 'org.slf4j:slf4j-simple:2.0.13'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    // optional Excel export
+    implementation 'org.apache.poi:poi-ooxml:5.2.5'
+}
+
+application {
+    mainClass = 'app.MainApp'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+tasks.register('runApp', JavaExec) {
+    group = 'application'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'app.MainApp'
+    // set module-path at runtime to include JavaFX native jars and add modules
+    doFirst {
+        jvmArgs = ["--module-path", classpath.asPath, "--add-modules", "javafx.controls,javafx.fxml"]
+    }
+}
+
+tasks.register('printCompileClasspath') {
+    doLast {
+        println '--- compileClasspath ---'
+        sourceSets.main.compileClasspath.files.each { println it }
+    }
+}
