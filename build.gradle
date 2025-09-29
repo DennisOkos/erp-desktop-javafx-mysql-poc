@@ -46,14 +46,12 @@ test {
     useJUnitPlatform()
 }
 
-tasks.register('runApp', JavaExec) {
+// Use the application plugin's built-in 'run' task (OpenJFX plugin will configure JavaFX JVM args).
+// Provide a tiny alias 'runApp' so users can run either `gradlew run` or `gradlew runApp`.
+tasks.register('runApp') {
     group = 'application'
-    classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'app.MainApp'
-    // set module-path at runtime to include JavaFX native jars and add modules
-    doFirst {
-        jvmArgs = ["--module-path", classpath.asPath, "--add-modules", "javafx.controls,javafx.fxml"]
-    }
+    description = 'Alias for the application plugin run task (starts the JavaFX UI)'
+    dependsOn 'run'
 }
 
 tasks.register('printCompileClasspath') {
